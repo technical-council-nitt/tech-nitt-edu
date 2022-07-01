@@ -1,0 +1,41 @@
+FROM python:slim
+
+ENV PYTHONUNBUFFERED 1
+
+RUN groupadd -r django && useradd --no-log-init -r -g django django
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+    libpcre3 \
+    mime-support \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY --chown=django:django requirements.txt .
+
+RUN BUILD_DEPS=" \
+    build-essential \
+    libpcre3-dev \
+    libpq-dev \
+    " \
+    && apt-get update && apt-get install -y --no-install-recommends $BUILD_DEPS \
+    && pip install --no-cache-dir -r requirements.txt \
+    && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $BUILD_DEPS \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --chown=django:django . .
+
+RUN mkdir /static && chown -R django:django /static
+
+ENV UWSGI_WSGI_FILE=technitt/wsgi.py
+ENV UWSGI_HTTP=:8000 UWSGI_MASTER=1 UWSGI_HTTP_AUTO_CHUNKED=1 UWSGI_HTTP_KEEPALIVE=1 UWSGI_LAZY_APPS=1 UWSGI_WSGI_ENV_BEHAVIOR=holy
+ENV UWSGI_WORKERS=2 UWSGI_THREADS=4
+ENV UWSGI_STATIC_MAP="/static/=/static/" UWSGI_STATIC_EXPIRES_URI="/static/.*\.[a-f0-9]{12,}\.(css|js|png|jpg|jpeg|gif|ico|woff|ttf|otf|svg|scss|map|txt) 315360000"
+
+USER django:django
+
+ENTRYPOINT ["/app/scripts/docker/entrypoint-prod.sh"]
+
+CMD ["uwsgi", "--show-config"]

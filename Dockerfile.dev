@@ -1,0 +1,34 @@
+FROM python:slim
+
+ENV PYTHONUNBUFFERED 1
+
+RUN groupadd -r django && useradd --no-log-init -r -g django django
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+    libpcre3 \
+    mime-support \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY --chown=django:django requirements.txt .
+
+RUN BUILD_DEPS=" \
+    build-essential \
+    libpcre3-dev \
+    libpq-dev \
+    " \
+    && apt-get update && apt-get install -y --no-install-recommends $BUILD_DEPS \
+    && pip install --no-cache-dir -r requirements.txt \
+    && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $BUILD_DEPS \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --chown=django:django . .
+
+RUN mkdir /static && chown -R django:django /static
+
+USER django:django
+
+ENTRYPOINT [ "/app/scripts/docker/entrypoint-dev.sh" ]
