@@ -20,6 +20,8 @@ services:
       - ./pgdata_pgadmin:/root/.pgadmin
     depends_on:
       - db
+    logging:
+      driver: "none"
 
   api:
     container_name: api
