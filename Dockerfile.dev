@@ -29,6 +29,7 @@ RUN BUILD_DEPS=" \
 COPY --chown=django:django . .
 
 RUN mkdir /static && chown -R django:django /static
+RUN mkdir /app/media && chown -R django:django /app/media
 
 USER django:django
 

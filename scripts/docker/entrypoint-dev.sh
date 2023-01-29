@@ -7,6 +7,10 @@ done
 
 echo -e "\e[32m >>> Postgres is up - continuing \e[97m"
 
+echo -e "\e[34m >>> Make Migrations \e[97m"
+python manage.py makemigrations
+echo -e "\e[32m >>> New migrations added \e[97m"
+
 echo -e "\e[34m >>> Migrating changes \e[97m"
 python manage.py migrate
 echo -e "\e[32m >>> migration completed \e[97m"
