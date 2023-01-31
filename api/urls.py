@@ -1,5 +1,5 @@
 from django.urls import re_path as url
-from .views import user, project, club
+from .views import user, project, club ,community
 
 # namespacing app
 app_name = 'api'
@@ -41,5 +41,16 @@ urlpatterns = [
     url('club/edit', club.Edit.as_view(), name='club-edit'),
     #Tags
     # url('club/tags', club.Tags.as_view(), name='tags'),
+
+    # Club routes
+    #search route: pass a parameter type (name) and value
+    url('community', community.AllCommunities.as_view(), name='community-all'),
+    url('community/search', community.Search.as_view(), name='search'),
+    # create route 
+    url('community/create', community.Create.as_view(), name='community-create'),
+    # edit route 
+    url('community/edit', community.Edit.as_view(), name='community-edit'),
+    #Tags
+    
     
 ]

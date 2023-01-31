@@ -160,6 +160,47 @@ class UserManager(BaseUserManager):
 
         return self._create_user(email, name, password, **extra_details)
 
+class CommunityMemberRelationship(models.Model):
+	community = models.ForeignKey("community", on_delete=models.CASCADE)
+	user = models.ForeignKey("User", on_delete=models.CASCADE)
+	privilege = models.ForeignKey("CommunityMemberPrivilege", on_delete=models.PROTECT)
+
+class CommunityMemberPrivilege(models.Model):
+    """
+    Different permission levels for the members
+    of a project.
+    1. View (Default): No Write or edit access, can only
+    view the contents of the page.
+    2. Admin : Can add members to users and assign privilege to the users.
+    """
+
+    class AvailablePrivileges(models.IntegerChoices):
+        """Text Choice for allowed privileges."""
+
+        VIEW = 1, _("View")
+        ADMIN = 2, _("Admin")
+
+    code = models.IntegerField(choices=AvailablePrivileges.choices)
+
+    # human readable privilege name
+    name = models.CharField(max_length=25)
+
+class Community(TimestampedModel):
+    name = models.CharField(max_length=255, default=None, unique=False)
+    
+    abstract = models.TextField(max_length=1e4)
+
+    link = models.CharField(max_length=100)
+
+    image = models.FileField(null=True,blank=True,upload_to='media/')
+
+    head = models.ForeignKey("User", on_delete=models.CASCADE)
+
+    def __str__(self):
+        """Returns name of club"""
+        # TODO
+        pass
+
 
 class User(AbstractBaseUser, PermissionsMixin, TimestampedModel):
     """User Model"""
