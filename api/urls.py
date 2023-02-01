@@ -30,7 +30,8 @@ urlpatterns = [
     url('project/edit', project.Edit.as_view(), name='project-edit'),
     #Tags
     # url('project/tags', project.Tags.as_view(), name='tags'),
-
+    url('community/edit', community.Edit.as_view(), name='community-edit'),
+    url('community/create', community.Create.as_view(), name='community-create'),
 	# Club routes
     #search route: pass a parameter type (name) and value
     url('clubs', club.AllClubs.as_view(), name='club-all'),
@@ -44,12 +45,13 @@ urlpatterns = [
 
     # Club routes
     #search route: pass a parameter type (name) and value
-    url('community', community.AllCommunities.as_view(), name='community-all'),
     url('community/search', community.Search.as_view(), name='search'),
+    url('community', community.AllCommunities.as_view(), name='community-all'),
+    
     # create route 
-    url('community/create', community.Create.as_view(), name='community-create'),
+    #url('community/create', community.Create.as_view(), name='community-create'),
     # edit route 
-    url('community/edit', community.Edit.as_view(), name='community-edit'),
+    
     #Tags
     
     

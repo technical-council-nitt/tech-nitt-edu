@@ -51,19 +51,19 @@ class Tags(View):
 @method_decorator(IsAdminDec, name='dispatch')
 class Create(View):
     """
-        Creates a community if user has admin access and club details (link and name) are unique
+        Creates a community if user has admin access and community details (link and name) are unique
     """
     def post(self, req):
-        print("hi")
+        print(req)
         name = req.POST.get("name")
-        head = req.POST.get("email")
+        head = req.POST.get("head")
         abstract = req.POST.get("abstract")
         link = req.POST.get("link")
-        myfile = req.FILES['image']
+        myfile = req.FILES["image"]
         fs = FileSystemStorage()
         filename = fs.save(myfile.name, myfile)
         uploaded_file_url = fs.url(filename)
-        print(uploaded_file_url)
+        #print(uploaded_file_url)
         
         if not req.is_admin:
             return error_response("PERMISSION DENIED TO CREATE COMMUNITY")
@@ -71,7 +71,7 @@ class Create(View):
             user = User.objects.get(email=head)
         except User.DoesNotExist:
             return error_response("User does not exist")
-        
+        print("user exist")
         if Community.objects.filter(name=name).exists():
             return error_response("A community with the same name exists! Please switch to a new community name")
         

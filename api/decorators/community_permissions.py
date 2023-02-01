@@ -36,6 +36,7 @@ def CheckAccessPrivilegeDec(view):
 
     def wrapper(*args, **kwargs):
         try:
+            print("ChkAccessPriv")
             request = args[0]
             assert isinstance(request, HttpRequest)
             user_id = request.session.get('user_id')

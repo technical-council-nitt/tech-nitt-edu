@@ -62,7 +62,6 @@ class Create(View):
         fs = FileSystemStorage()
         filename = fs.save(myfile.name, myfile)
         uploaded_file_url = fs.url(filename)
-        print(uploaded_file_url)
         
         if not req.is_admin:
             return error_response("PERMISSION DENIED TO CREATE CLUB")
@@ -75,6 +74,7 @@ class Create(View):
             return error_response("A club with the same name exists! Please switch to a new club name")
         
         try:
+            print(name, abstract, link, user, uploaded_file_url)
             if create_club(name, abstract, link, user, uploaded_file_url):
                 logger.info('Club(name={}) creation successful'.format(name))
                 return "Club created successfully!"
