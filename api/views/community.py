@@ -1,10 +1,10 @@
 from django.utils.decorators import method_decorator
 from django.views.generic import View
 from api.decorators.response import JsonResponseDec
-from api.decorators.club_permissions import IsAdminDec, CheckAccessPrivilegeDec
-from api.models import Club, User
+from api.decorators.community_permissions import IsAdminDec, CheckAccessPrivilegeDec
+from api.models import Community, User
 from api.controllers.response_format import error_response
-from api.controllers.club_utilities import create_club
+from api.controllers.community_utilities import create_community
 from django.core.files.storage import FileSystemStorage
 from django.db.models import Q
 import logging
@@ -24,23 +24,23 @@ def list_to_dict(items):
     return converted
 
 @method_decorator(JsonResponseDec, name='dispatch')
-class AllClubs(View):
+class AllCommunities(View):
     """
-    Return all Clubs
+    Return all Communities
     """
     def get(self, req):
-        clubs = Club.objects.all()
+        communities = Community.objects.all()
         return {
-            'data': list_to_dict(clubs)
+            'data': list_to_dict(communities)
         }
 
 @method_decorator(JsonResponseDec, name='dispatch')
 class Search(View):
     def get(self, req):
         query = req.GET.get("query")
-        clubs = Club.objects.filter(Q(head__name__unaccent__icontains = query) | Q(name__unaccent__icontains=query))
+        communities = Community.objects.filter(Q(head__name__unaccent__icontains = query) | Q(name__unaccent__icontains=query))
         return {
-            'data': list_to_dict(clubs)
+            'data': list_to_dict(communities)
         }
 
 class Tags(View):
@@ -51,44 +51,45 @@ class Tags(View):
 @method_decorator(IsAdminDec, name='dispatch')
 class Create(View):
     """
-        Creates a club if user has admin access and club details (link and name) are unique
+        Creates a community if user has admin access and community details (link and name) are unique
     """
     def post(self, req):
+        print(req)
         name = req.POST.get("name")
         head = req.POST.get("head")
         abstract = req.POST.get("abstract")
         link = req.POST.get("link")
-        myfile = req.FILES['image']
+        myfile = req.FILES["image"]
         fs = FileSystemStorage()
         filename = fs.save(myfile.name, myfile)
         uploaded_file_url = fs.url(filename)
+        #print(uploaded_file_url)
         
         if not req.is_admin:
-            return error_response("PERMISSION DENIED TO CREATE CLUB")
+            return error_response("PERMISSION DENIED TO CREATE COMMUNITY")
         try:
             user = User.objects.get(email=head)
         except User.DoesNotExist:
             return error_response("User does not exist")
-        
-        if Club.objects.filter(name=name).exists():
-            return error_response("A club with the same name exists! Please switch to a new club name")
+        print("user exist")
+        if Community.objects.filter(name=name).exists():
+            return error_response("A community with the same name exists! Please switch to a new community name")
         
         try:
-            print(name, abstract, link, user, uploaded_file_url)
-            if create_club(name, abstract, link, user, uploaded_file_url):
-                logger.info('Club(name={}) creation successful'.format(name))
-                return "Club created successfully!"
+            if create_community(name, abstract, link, user, uploaded_file_url):
+                logger.info('Community(name={}) creation successful'.format(name))
+                return "Community created successfully!"
             else:
                 return error_response("Invalid details")
         except Exception as e:
             logger.error(e)
-            return error_response("Club creation failed")
+            return error_response("Community creation failed")
 
 @method_decorator(JsonResponseDec, name='dispatch')
 @method_decorator(CheckAccessPrivilegeDec, name='dispatch')
 class Edit(View):
     """
-        Updates following details in a club if user has "Admin" access
+        Updates following details in a community if user has "Admin" access
         1. Abstract
         2. link
     """
@@ -99,11 +100,11 @@ class Edit(View):
         if not (req.access_privilege == "Edit" or req.access_privilege == "Admin" ):
             return error_response("USER DOESN'T HAVE EDIT ACCESS")
         try:
-            club = Club.objects.get(name=name)
-            club.link = link
-            club.abstract = abstract
-            club.save()
-            logger.info('Club(name={}) update successful'.format(club.name))
-            return "Club updated successfully!"
-        except Club.DoesNotExist:
-            return error_response("Club doesn't exist")
+            community = Community.objects.get(name=name)
+            community.link = link
+            community.abstract = abstract
+            community.save()
+            logger.info('Community(name={}) update successful'.format(community.name))
+            return "Community updated successfully!"
+        except Community.DoesNotExist:
+            return error_response("Community doesn't exist")

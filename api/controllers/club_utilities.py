@@ -9,7 +9,9 @@ def create_club(name, abstract, link, head, uploaded_file_url):
     """
     try:
         club_member_privilege = ClubMemberPrivilege.objects.filter(name = "Admin")
+        print(club_member_privilege)
         if club_member_privilege.exists():
+            print(name, head, abstract, link, uploaded_file_url)
             club = Club.objects.create(name = name, abstract = abstract, link=link, head = head, image = uploaded_file_url)
             ClubMemberRelationship.objects.create(club = club, user = head, privilege = club_member_privilege[0])
             return True
